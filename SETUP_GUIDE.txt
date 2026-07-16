@@ -1,0 +1,138 @@
+================================================================================
+              SURESERVE - FULL DEPLOYMENT & ARCHITECTURE GUIDE
+================================================================================
+
+This guide explains the architecture of the live, deployed SureServe Electronics 
+Service Provider platform. It is fully cloud-hosted and no longer requires a 
+local database or local Python/Node environment to run.
+
+================================================================================
+  1. ARCHITECTURE OVERVIEW
+================================================================================
+
+The platform is split into three cloud-hosted layers:
+
+  1. FRONTEND: React (Vite)
+     - Hosted on: Vercel
+     - The frontend is automatically deployed whenever code is pushed to the 
+       `main` branch of the GitHub repository.
+
+  2. BACKEND: Node.js (Express)
+     - Hosted on: Render (or similar Node.js cloud provider)
+     - The backend provides the REST APIs for authentication, profiles, 
+       service requests, tickets, and ratings.
+     - Note: We previously used a Flask (Python) backend, but it was fully 
+       migrated to a Node.js (Express) backend for better Javascript ecosystem 
+       compatibility. The old `backend_flask` directory may still exist as an 
+       archive, but the active backend is in the `backend/` folder.
+
+  3. DATABASE: PostgreSQL
+     - Hosted on: Managed PostgreSQL Provider (e.g., Supabase / Aiven / Render DB)
+     - We migrated from MySQL to PostgreSQL to better support modern cloud 
+       hosting platforms.
+
+================================================================================
+  2. DEPLOYED URLs (LIVE LINKS)
+================================================================================
+
+  - BUYER / CUSTOMER PORTAL: 
+    [Your Vercel Domain] (e.g., https://sureserve-frontend.vercel.app/)
+
+  - SELLER / PROVIDER PORTAL:
+    [Your Vercel Domain]/seller-login 
+
+  - API BASE URL:
+    https://sureserve-backend.onrender.com
+
+================================================================================
+  3. CREDENTIALS FOR TESTING
+================================================================================
+
+To access the Seller/Provider dashboard with all the analytics and management 
+tools, use the admin account that was seeded into the production database:
+
+  - Email: seller@techking.com
+  - Password: admin123
+
+For the Buyer Portal, you can either create a new account by clicking "Create 
+Account" on the login page, or use an existing test account if you made one.
+
+================================================================================
+  4. ENVIRONMENT VARIABLES (.env)
+================================================================================
+
+Because the app is deployed, you do not need to configure local `.env` files 
+unless you want to run it locally for development.
+
+The LIVE Environment Variables are configured directly in Vercel and Render:
+
+  Vercel (Frontend) Variables:
+    VITE_API_URL = https://sureserve-backend.onrender.com
+
+  Render (Backend) Variables:
+    PORT = 5000
+    DATABASE_URL = postgres://[username]:[password]@[host]:[port]/[database]
+    JWT_SECRET = sureserve_secret_key
+
+================================================================================
+  5. MANUAL PASSWORD HASHING (IF NEEDED)
+================================================================================
+
+If you ever need to manually insert a user directly into the PostgreSQL database,
+you cannot use plain text passwords. You must hash them using `bcrypt`.
+
+To generate a hash quickly via your terminal (using Node.js), run:
+
+  node -e "require('bcryptjs').hash('admin123', 10).then(console.log)"
+
+You can then copy the output hash and use it in your SQL `INSERT` statement.
+Alternatively, just use the `/api/auth/register` API endpoint, which handles 
+hashing automatically!
+
+================================================================================
+  6. LOCAL DEVELOPMENT (OPTIONAL)
+================================================================================
+
+If you want to run the project locally to make edits without affecting the live 
+site, follow these steps:
+
+  1. Clone the repository
+  2. Open Terminal 1 (Backend):
+     cd backend
+     npm install
+     npm start
+
+  3. Open Terminal 2 (Frontend):
+     npm install
+     npm run dev
+
+  (You will need to create a `backend/.env` file with the DATABASE_URL pointing 
+  to your cloud database or a local PostgreSQL instance).
+
+================================================================================
+  6. PROJECT STRUCTURE
+================================================================================
+
+  sureserve_frontend/
+  ├── backend/                 ← ACTIVE Node.js Express API
+  │   ├── server.js            ← Main entry point
+  │   ├── db.js                ← PostgreSQL connection pool
+  │   ├── init.sql             ← Full database schema (run on initDB)
+  │   ├── controllers/         ← Business logic for all routes
+  │   ├── middleware/          ← JWT authentication middleware
+  │   └── routes/              ← API route definitions
+  │
+  ├── backend_flask/           ← ARCHIVED Python backend (Do not use)
+  │
+  ├── src/                     ← React Frontend
+  │   ├── AppAuth.jsx          ← Main app router (Buyer vs Seller paths)
+  │   ├── components/
+  │   │   ├── buyer/           ← Buyer sidebar, header, layout
+  │   │   └── seller/          ← Seller dashboard, layout, analytics
+  │   ├── pages/buyer/         ← All buyer pages (Dashboard, Profile, etc.)
+  │   └── services/            ← Axios/Fetch API calls to backend
+  │
+  ├── package.json             ← Frontend dependencies
+  └── vite.config.js           ← Vite configuration
+
+================================================================================
