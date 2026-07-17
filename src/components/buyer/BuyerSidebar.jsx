@@ -1,15 +1,6 @@
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import {
-  Bolt,
-  LayoutDashboard,
-  Wrench,
-  Ticket,
-  ClipboardList,
-  Crown,
-  UserRound,
-  LogOut,
-  Zap,
-} from "lucide-react";
+import { Bolt, LayoutDashboard, Wrench, Ticket, ClipboardList, Crown, UserRound, LogOut, Zap, Menu, X } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 
 const menuItems = [
@@ -21,120 +12,85 @@ const menuItems = [
   { key: "profile", label: "Profile", icon: UserRound, path: "/profile" },
 ];
 
-const subscriptionIcons = {
-  Professional: { Icon: Zap, color: "text-blue-400", bg: "bg-blue-500/20" },
-  Enterprise: { Icon: Crown, color: "text-amber-400", bg: "bg-amber-500/20" },
-};
+const subscriptionIcons = { Professional: { Icon: Zap, color: "text-blue-400", bg: "bg-blue-500/20" }, Enterprise: { Icon: Crown, color: "text-amber-400", bg: "bg-amber-500/20" } };
 
 export default function BuyerSidebar({ user }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const name = user?.fullName || "User";
   const email = user?.email || "";
   const subscription = user?.subscription || "Free";
   const photo = user?.photo || localStorage.getItem(`profilePhoto_${user?.id || "default"}`) || "";
-  const initials = name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
+  const initials = name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   const subInfo = subscriptionIcons[subscription];
 
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
-      logout();
-      navigate("/login", { replace: true });
-    }
-  };
+  // Close on desktop resize
+  useEffect(() => { const h = () => { if (window.innerWidth >= 1024) setMobileOpen(false); }; window.addEventListener("resize", h); return () => window.removeEventListener("resize", h); }, []);
+  useEffect(() => { document.body.style.overflow = mobileOpen ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [mobileOpen]);
 
-  return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col bg-[#0B1B34] text-white">
+  const handleLogout = () => { if (window.confirm("Are you sure you want to log out?")) { logout(); navigate("/login", { replace: true }); } };
+
+  const sidebarContent = (
+    <>
       <div className="p-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600">
-            <Bolt className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-lg font-extrabold tracking-wide">SURE SERVE</h1>
-            <p className="text-xs text-sky-300">Buyer Portal</p>
-          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600"><Bolt className="h-6 w-6" /></div>
+          <div><h1 className="text-lg font-extrabold tracking-wide">SURE SERVE</h1><p className="text-xs text-sky-300">Buyer Portal</p></div>
         </div>
       </div>
-
       <div className="mx-4 border-t border-white/10 py-5">
         <div className="flex items-center gap-4">
-          {photo ? (
-            <img
-              src={photo}
-              alt=""
-              className="h-10 w-10 flex-shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white/20"
-            />
-          ) : (
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold">
-              {initials}
-            </div>
-          )}
+          {photo ? <img src={photo} alt="" className="h-10 w-10 flex-shrink-0 rounded-full object-cover ring-2 ring-white/20" /> : <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold">{initials}</div>}
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className="truncate font-bold">{name}</p>
-              {subInfo && (
-                <span className={`flex h-5 w-5 items-center justify-center rounded-md ${subInfo.bg}`}>
-                  <subInfo.Icon className={`h-3 w-3 ${subInfo.color}`} />
-                </span>
-              )}
-            </div>
+            <div className="flex items-center gap-2"><p className="truncate font-bold">{name}</p>{subInfo && <span className={`flex h-5 w-5 items-center justify-center rounded-md ${subInfo.bg}`}><subInfo.Icon className={`h-3 w-3 ${subInfo.color}`} /></span>}</div>
             <p className="truncate text-xs text-sky-300">{email}</p>
           </div>
         </div>
       </div>
-
       <nav className="flex-1 px-3 py-3">
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
-
             return (
               <li key={item.key}>
-                <NavLink
-                  to={item.path}
-                  end
-                  className={({ isActive }) =>
-                    `flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-bold transition ${
-                      isActive
-                        ? "border border-blue-500 bg-blue-600/25 text-white"
-                        : "text-sky-200 hover:bg-white/10 hover:text-white"
-                    }`
-                  }
-                >
-                  <span className="flex items-center gap-4">
-                    <Icon className="h-6 w-6" />
-                    {item.label}
-                  </span>
-                  {item.badge ? (
-                    <span className="rounded-full bg-orange-600/70 px-2 py-0.5 text-xs text-white">
-                      {item.badge}
-                    </span>
-                  ) : null}
+                <NavLink to={item.path} end onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) => `flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-bold transition ${isActive ? "border border-blue-500 bg-blue-600/25 text-white" : "text-sky-200 hover:bg-white/10 hover:text-white"}`}>
+                  <span className="flex items-center gap-4"><Icon className="h-6 w-6" />{item.label}</span>
+                  {item.badge && <span className="rounded-full bg-orange-600/70 px-2 py-0.5 text-xs text-white">{item.badge}</span>}
                 </NavLink>
               </li>
             );
           })}
         </ul>
       </nav>
-
       <div className="mx-4 border-t border-white/10 p-4">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-base font-bold text-red-400 transition hover:bg-red-500/10"
-        >
-          <LogOut className="h-6 w-6" />
-          Logout
-        </button>
+        <button type="button" onClick={handleLogout} className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-base font-bold text-red-400 transition hover:bg-red-500/10"><LogOut className="h-6 w-6" />Logout</button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile hamburger */}
+      <button type="button" onClick={() => setMobileOpen(true)} className="fixed left-3 top-3 z-50 rounded-xl bg-[#0B1B34] p-2.5 text-white shadow-lg lg:hidden"><Menu className="h-5 w-5" /></button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-[280px] flex-col bg-[#0B1B34] text-white overflow-y-auto">
+            <button type="button" onClick={() => setMobileOpen(false)} className="absolute right-4 top-4 rounded-xl p-1 text-white/70 hover:text-white"><X className="h-5 w-5" /></button>
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col bg-[#0B1B34] text-white lg:flex">
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

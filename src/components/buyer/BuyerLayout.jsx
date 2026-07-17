@@ -10,18 +10,12 @@ export default function BuyerLayout() {
   const isDarkMode = resolvedBuyer === "dark";
 
   return (
-    <div
-      className={`min-h-screen transition ${
-        isDarkMode
-          ? "dark-mode bg-slate-950 text-white"
-          : "bg-[#edf3ff] text-slate-950"
-      }`}
-    >
+    <div className={`min-h-screen transition ${isDarkMode ? "dark-mode bg-slate-950 text-white" : "bg-[#edf3ff] text-slate-950"}`}>
       <BuyerSidebar user={user} />
-
-      <div className="ml-[260px] min-h-screen">
+      {/* Content: offset by sidebar on desktop, full-width on mobile */}
+      <div className="min-h-screen lg:ml-[260px]">
         <BuyerHeader isDarkMode={isDarkMode} user={user} />
-        <main className="p-8">
+        <main className="p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
