@@ -1,4 +1,5 @@
 import db from "../db.js";
+import { validatePriority } from "../middleware/subscriptionMiddleware.js";
 
 // @desc    Create a service request
 // @route   POST /api/service-requests
@@ -20,6 +21,16 @@ export const createServiceRequest = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Service type and location are required.",
+      });
+    }
+
+    // Enforce subscription-based priority gating
+    const userSubscription = req.user.subscription || "Free";
+    const priorityCheck = validatePriority(userSubscription, priority);
+    if (!priorityCheck.valid) {
+      return res.status(403).json({
+        success: false,
+        message: `The "${priority}" priority level requires a higher subscription plan. Your current plan (${userSubscription}) allows: ${priorityCheck.allowed.join(", ")}.`,
       });
     }
 

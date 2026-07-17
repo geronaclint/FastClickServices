@@ -85,6 +85,7 @@ export const loginUser = async (req, res) => {
         id: user.id,
         email: user.email,
         role: user.role,
+        subscription: user.subscription || "Free",
       },
       process.env.JWT_SECRET,
       {
@@ -101,6 +102,7 @@ export const loginUser = async (req, res) => {
         fullName: user.full_name,
         email: user.email,
         role: user.role,
+        subscription: user.subscription || "Free",
       },
     });
   } catch (error) {

@@ -1,7 +1,4 @@
 import db from "../db.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 
 // @desc    Get current user profile
 // @route   GET /api/profile
@@ -119,21 +116,6 @@ export const getSellerStats = async (req, res) => {
         totalRatings,
       },
     });
-  } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const initProductionDatabase = async (req, res) => {
-  try {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const sqlPath = path.join(__dirname, '..', 'init.sql');
-    const sql = fs.readFileSync(sqlPath, 'utf-8');
-
-    await db.query(sql);
-    
-    return res.json({ success: true, message: "Production database successfully initialized/updated with missing tables and columns!" });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }

@@ -1,4 +1,5 @@
 import db from "../db.js";
+import { validatePriority } from "../middleware/subscriptionMiddleware.js";
 
 // @desc    Create a ticket
 // @route   POST /api/tickets
@@ -9,6 +10,16 @@ export const createTicket = async (req, res) => {
 
     if (!ticketType || !ticketType.trim()) {
       return res.status(400).json({ success: false, message: "Ticket type is required." });
+    }
+
+    // Enforce subscription-based priority gating
+    const userSubscription = req.user.subscription || "Free";
+    const priorityCheck = validatePriority(userSubscription, priority);
+    if (!priorityCheck.valid) {
+      return res.status(403).json({
+        success: false,
+        message: `The "${priority}" priority level requires a higher subscription plan. Your current plan (${userSubscription}) allows: ${priorityCheck.allowed.join(", ")}.`,
+      });
     }
 
     let result;
