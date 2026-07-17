@@ -30,8 +30,8 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
-      "https://sureserve-frontend-mauve.vercel.app",
-      "https://sureserve-frontend-git-main-jego-agbayani-s-projects.vercel.app",
+      "https://fast-click-services.vercel.app",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
