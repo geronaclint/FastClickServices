@@ -56,31 +56,50 @@ export const createTicket = async (req, res) => {
 export const getTickets = async (req, res) => {
   try {
     const user = req.user;
+    const { limit, offset } = req.pagination || { limit: 20, offset: 0 };
     let result;
+    let countResult;
 
     if (user.role === "provider" || user.role === "admin" || user.role === "seller") {
       try {
+        countResult = await db.query("SELECT COUNT(*) FROM tickets");
         result = await db.query(
           `SELECT t.*, u.full_name AS customer_name, u.email AS customer_email, u.phone AS customer_phone, u.address AS customer_address, u.subscription AS customer_subscription
            FROM tickets t JOIN users u ON t.user_id = u.id
-           ORDER BY t.created_at DESC`
+           ORDER BY t.created_at DESC
+           LIMIT $1 OFFSET $2`,
+          [limit, offset]
         );
       } catch {
         // Fallback: subscription/address columns may not exist
+        countResult = await db.query("SELECT COUNT(*) FROM tickets");
         result = await db.query(
           `SELECT t.*, u.full_name AS customer_name, u.email AS customer_email
            FROM tickets t JOIN users u ON t.user_id = u.id
-           ORDER BY t.created_at DESC`
+           ORDER BY t.created_at DESC
+           LIMIT $1 OFFSET $2`,
+          [limit, offset]
         );
       }
     } else {
-      result = await db.query(
-        "SELECT * FROM tickets WHERE user_id = $1 ORDER BY created_at DESC",
+      countResult = await db.query(
+        "SELECT COUNT(*) FROM tickets WHERE user_id = $1",
         [user.id]
+      );
+      result = await db.query(
+        "SELECT * FROM tickets WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
+        [user.id, limit, offset]
       );
     }
 
-    return res.json({ success: true, count: result.rows.length, data: result.rows });
+    const totalCount = parseInt(countResult.rows[0].count, 10);
+    return res.json({
+      success: true,
+      data: result.rows,
+      page: req.pagination?.page || 1,
+      totalPages: Math.ceil(totalCount / limit),
+      totalCount,
+    });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }

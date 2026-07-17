@@ -1,3 +1,4 @@
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Bolt,
   LayoutDashboard,
@@ -9,14 +10,15 @@ import {
   LogOut,
   Zap,
 } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const menuItems = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "installation", label: "Service Request", icon: Wrench },
-  { key: "ticket", label: "Submit Support Ticket", icon: Ticket },
-  { key: "recent", label: "Recent Tickets & Support", icon: ClipboardList },
-  { key: "premium", label: "SureServe Premium", icon: Crown, badge: "PRO" },
-  { key: "profile", label: "Profile", icon: UserRound },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+  { key: "installation", label: "Service Request", icon: Wrench, path: "/installation" },
+  { key: "ticket", label: "Submit Support Ticket", icon: Ticket, path: "/ticket" },
+  { key: "recent", label: "Recent Tickets & Support", icon: ClipboardList, path: "/recent" },
+  { key: "premium", label: "SureServe Premium", icon: Crown, badge: "PRO", path: "/premium" },
+  { key: "profile", label: "Profile", icon: UserRound, path: "/profile" },
 ];
 
 const subscriptionIcons = {
@@ -24,11 +26,14 @@ const subscriptionIcons = {
   Enterprise: { Icon: Crown, color: "text-amber-400", bg: "bg-amber-500/20" },
 };
 
-export default function BuyerSidebar({ currentPage, setPage, onLogout, user }) {
+export default function BuyerSidebar({ user }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const name = user?.fullName || "User";
   const email = user?.email || "";
   const subscription = user?.subscription || "Free";
-  const photo = user?.photo || localStorage.getItem(`profilePhoto_${user?.id || 'default'}`) || "";
+  const photo = user?.photo || localStorage.getItem(`profilePhoto_${user?.id || "default"}`) || "";
   const initials = name
     .split(" ")
     .map((w) => w[0])
@@ -40,7 +45,8 @@ export default function BuyerSidebar({ currentPage, setPage, onLogout, user }) {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
-      onLogout();
+      logout();
+      navigate("/login", { replace: true });
     }
   };
 
@@ -61,7 +67,11 @@ export default function BuyerSidebar({ currentPage, setPage, onLogout, user }) {
       <div className="mx-4 border-t border-white/10 py-5">
         <div className="flex items-center gap-4">
           {photo ? (
-            <img src={photo} alt="" className="h-10 w-10 flex-shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white/20" />
+            <img
+              src={photo}
+              alt=""
+              className="h-10 w-10 flex-shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white/20"
+            />
           ) : (
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold">
               {initials}
@@ -85,18 +95,19 @@ export default function BuyerSidebar({ currentPage, setPage, onLogout, user }) {
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const active = currentPage === item.key;
 
             return (
               <li key={item.key}>
-                <button
-                  type="button"
-                  onClick={() => setPage(item.key)}
-                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-bold transition ${
-                    active
-                      ? "border border-blue-500 bg-blue-600/25 text-white"
-                      : "text-sky-200 hover:bg-white/10 hover:text-white"
-                  }`}
+                <NavLink
+                  to={item.path}
+                  end
+                  className={({ isActive }) =>
+                    `flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-bold transition ${
+                      isActive
+                        ? "border border-blue-500 bg-blue-600/25 text-white"
+                        : "text-sky-200 hover:bg-white/10 hover:text-white"
+                    }`
+                  }
                 >
                   <span className="flex items-center gap-4">
                     <Icon className="h-6 w-6" />
@@ -106,10 +117,8 @@ export default function BuyerSidebar({ currentPage, setPage, onLogout, user }) {
                     <span className="rounded-full bg-orange-600/70 px-2 py-0.5 text-xs text-white">
                       {item.badge}
                     </span>
-                  ) : active ? (
-                    <span className="text-sky-300">›</span>
                   ) : null}
-                </button>
+                </NavLink>
               </li>
             );
           })}

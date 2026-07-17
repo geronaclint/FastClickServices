@@ -1,14 +1,14 @@
+import { Outlet } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 import BuyerHeader from "./BuyerHeader";
 import BuyerSidebar from "./BuyerSidebar";
 
-export default function BuyerLayout({
-  children,
-  currentPage,
-  setPage,
-  onLogout,
-  isDarkMode,
-  user,
-}) {
+export default function BuyerLayout() {
+  const { user } = useAuth();
+  const { resolvedBuyer } = useTheme();
+  const isDarkMode = resolvedBuyer === "dark";
+
   return (
     <div
       className={`min-h-screen transition ${
@@ -17,16 +17,13 @@ export default function BuyerLayout({
           : "bg-[#edf3ff] text-slate-950"
       }`}
     >
-      <BuyerSidebar
-        currentPage={currentPage}
-        setPage={setPage}
-        onLogout={onLogout}
-        user={user}
-      />
+      <BuyerSidebar user={user} />
 
       <div className="ml-[260px] min-h-screen">
         <BuyerHeader isDarkMode={isDarkMode} user={user} />
-        <main className="p-8">{children}</main>
+        <main className="p-8">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

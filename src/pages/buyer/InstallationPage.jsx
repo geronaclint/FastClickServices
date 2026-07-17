@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Clock3, FileText, MapPin, Phone, User, UserCheck, Wrench } from "lucide-react";
 import { createServiceRequest } from "../../services/serviceRequestService";
-import { getUser } from "../../services/authService";
+import { useAuth } from "../../contexts/AuthContext";
 
 const fieldClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100";
@@ -41,9 +42,9 @@ function FieldWrap({ label, required, icon: Icon, children, extra }) {
   );
 }
 
-export default function InstallationPage({ setPage, user }) {
-  const currentUser = getUser();
-  const subscription = user?.subscription || currentUser?.subscription || "Free";
+export default function InstallationPage() {
+  const navigate = useNavigate();
+  const { user, subscription } = useAuth();
   const priorityOptions = getPriorityOptions(subscription);
 
   const [form, setForm] = useState({
@@ -161,8 +162,7 @@ export default function InstallationPage({ setPage, user }) {
           time: "",
           description: "",
         });
-        // Navigate to recent page so user sees the new request
-        setTimeout(() => setPage("recent"), 800);
+        setTimeout(() => navigate("/recent"), 800);
       } else {
         setMessage(result.message || "Failed to submit request.");
       }
@@ -177,7 +177,7 @@ export default function InstallationPage({ setPage, user }) {
     <div className="mx-auto max-w-3xl">
       <button
         type="button"
-        onClick={() => setPage("dashboard")}
+        onClick={() => navigate("/dashboard")}
         className="mb-5 flex items-center gap-2 text-slate-500 hover:text-slate-900"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -299,10 +299,10 @@ export default function InstallationPage({ setPage, user }) {
               label="Contact Person"
               icon={User}
               extra={
-                currentUser?.fullName && (
+                user?.fullName && (
                   <button
                     type="button"
-                    onClick={() => setForm({ ...form, contactPerson: currentUser.fullName })}
+                    onClick={() => setForm({ ...form, contactPerson: user.fullName })}
                     className="ml-auto inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 transition hover:bg-blue-100"
                   >
                     <UserCheck className="h-3 w-3" />
@@ -412,7 +412,7 @@ export default function InstallationPage({ setPage, user }) {
             </button>
             <button
               type="button"
-              onClick={() => setPage("dashboard")}
+              onClick={() => navigate("/dashboard")}
               className="rounded-xl border border-slate-200 bg-white px-7 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               Cancel

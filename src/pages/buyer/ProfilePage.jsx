@@ -13,8 +13,13 @@ import {
 } from "lucide-react";
 import { getProfile, updateProfile } from "../../services/profileService";
 import { updateUserLocal } from "../../services/authService";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
-export default function ProfilePage({ isDarkMode, setIsDarkMode, user, onUpdateUser }) {
+export default function ProfilePage() {
+  const { user, updateUser } = useAuth();
+  const { buyerTheme, setBuyerTheme, resolvedBuyer } = useTheme();
+  const isDarkMode = resolvedBuyer === "dark";
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState("");
@@ -89,9 +94,7 @@ export default function ProfilePage({ isDarkMode, setIsDarkMode, user, onUpdateU
 
         // Also update localStorage user data
         updateUserLocal({ fullName: profile.fullName });
-        if (onUpdateUser) {
-           onUpdateUser({ ...user, fullName: profile.fullName, photo: profile.photo });
-        }
+        updateUser({ fullName: profile.fullName, photo: profile.photo });
       } else {
         setSaveMessage(res.message || "Update failed.");
       }
@@ -153,7 +156,7 @@ export default function ProfilePage({ isDarkMode, setIsDarkMode, user, onUpdateU
 
           <button
             type="button"
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={() => setBuyerTheme(isDarkMode ? "light" : "dark")}
             className={`relative h-12 w-20 rounded-full p-1 transition ${
               isDarkMode ? "bg-blue-600" : "bg-slate-300"
             }`}

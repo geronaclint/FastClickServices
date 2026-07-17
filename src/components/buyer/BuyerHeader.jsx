@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, Crown, Zap, Clock3, CheckCircle2 } from "lucide-react";
 import { getTickets } from "../../services/ticketService";
 import { getServiceRequests } from "../../services/serviceRequestService";
@@ -22,13 +23,14 @@ function formatTimeAgo(dateStr) {
 }
 
 export default function BuyerHeader({ isDarkMode, user }) {
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
 
   const name = user?.fullName || "User";
   const subscription = user?.subscription || "Free";
-  const photo = user?.photo || localStorage.getItem(`profilePhoto_${user?.id || 'default'}`) || "";
+  const photo = user?.photo || localStorage.getItem(`profilePhoto_${user?.id || "default"}`) || "";
   const initials = name
     .split(" ")
     .map((w) => w[0])
@@ -42,16 +44,16 @@ export default function BuyerHeader({ isDarkMode, user }) {
     // Fetch notifications
     Promise.all([
       getTickets().catch(() => ({ success: false, data: [] })),
-      getServiceRequests().catch(() => ({ success: false, data: [] }))
+      getServiceRequests().catch(() => ({ success: false, data: [] })),
     ]).then(([ticketRes, requestRes]) => {
       const items = [];
       if (ticketRes.success && ticketRes.data) {
-        ticketRes.data.forEach(t => items.push({...t, title: `Ticket #${t.id} - ${t.status}`}));
+        ticketRes.data.forEach((t) => items.push({ ...t, title: `Ticket #${t.id} - ${t.status}` }));
       }
       if (requestRes.success && requestRes.data) {
-        requestRes.data.forEach(r => items.push({...r, title: `Service #${r.id} - ${r.status}`}));
+        requestRes.data.forEach((r) => items.push({ ...r, title: `Service #${r.id} - ${r.status}` }));
       }
-      const sorted = items.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+      const sorted = items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
       setNotifications(sorted);
     });
 
@@ -67,8 +69,7 @@ export default function BuyerHeader({ isDarkMode, user }) {
 
   const handleNotificationClick = () => {
     setShowNotifications(false);
-    // Ensure we trigger the page change via custom event since BuyerLayout uses a setPage prop
-    window.dispatchEvent(new CustomEvent("navigatePage", { detail: "recent" }));
+    navigate("/recent");
   };
 
   return (
@@ -115,8 +116,8 @@ export default function BuyerHeader({ isDarkMode, user }) {
                   <p className="p-4 text-center text-sm text-slate-500">No new notifications</p>
                 ) : (
                   notifications.map((n, i) => (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       onClick={handleNotificationClick}
                       className={`flex cursor-pointer items-start gap-3 rounded-xl p-3 transition ${isDarkMode ? "hover:bg-slate-700" : "hover:bg-slate-50"}`}
                     >

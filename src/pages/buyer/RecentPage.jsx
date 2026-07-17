@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ClipboardList,
   Eye,
@@ -338,7 +339,8 @@ function TicketDetailsModal({ ticket, onClose }) {
   );
 }
 
-export default function RecentPage({ setPage }) {
+export default function RecentPage() {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [search, setSearch] = useState("");
@@ -442,7 +444,7 @@ export default function RecentPage({ setPage }) {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setPage("ticket")}
+            onClick={() => navigate("/ticket")}
             className="flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-3 font-bold text-white transition hover:bg-orange-600"
           >
             <Ticket className="h-4 w-4" />
@@ -450,7 +452,7 @@ export default function RecentPage({ setPage }) {
           </button>
           <button
             type="button"
-            onClick={() => setPage("installation")}
+            onClick={() => navigate("/installation")}
             className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-bold text-white transition hover:bg-blue-700"
           >
             <Wrench className="h-4 w-4" />

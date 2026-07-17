@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
 import {
   Bolt,
   Wrench,
@@ -15,13 +17,7 @@ import {
   Store,
   ShoppingBag,
 } from "lucide-react";
-import { loginSeller } from "./utils/sellerAuth";
-import {
-  registerBuyer,
-  loginBuyer,
-  loginSellerAccount,
-  saveAuthData,
-} from "./services/authService";
+// Auth logic now uses useAuth() context
 
 const featureItems = [
   {
@@ -253,7 +249,9 @@ function ForgotPasswordScreen({ isSellerPortal, form, setForm, onBack }) {
   );
 }
 
-export default function AppAuth({ onLogin, portalType = "buyer" }) {
+export default function AppAuth({ portalType = "buyer" }) {
+  const navigate = useNavigate();
+  const { login: authLogin, register: authRegister } = useAuth();
   const [mode, setMode] = useState("login");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -282,9 +280,10 @@ export default function AppAuth({ onLogin, portalType = "buyer" }) {
       let result;
 
       if (isSellerPortal) {
-        result = await loginSellerAccount({
+        result = await authLogin({
           email: form.email,
           password: form.password,
+          portalType: "seller",
         });
 
         if (!result.success) {
@@ -292,21 +291,15 @@ export default function AppAuth({ onLogin, portalType = "buyer" }) {
           return;
         }
 
-        saveAuthData({
-          token: result.token,
-          user: result.user,
-        });
-
-        loginSeller();
-        window.history.pushState({}, "", "/seller-dashboard");
-        window.dispatchEvent(new PopStateEvent("popstate"));
+        navigate("/seller-dashboard", { replace: true });
         return;
       }
 
       if (isLogin) {
-        result = await loginBuyer({
+        result = await authLogin({
           email: form.email,
           password: form.password,
+          portalType: "buyer",
         });
 
         if (!result.success) {
@@ -314,16 +307,11 @@ export default function AppAuth({ onLogin, portalType = "buyer" }) {
           return;
         }
 
-        saveAuthData({
-          token: result.token,
-          user: result.user,
-        });
-
-        onLogin(result.user);
+        navigate("/dashboard", { replace: true });
         return;
       }
 
-      result = await registerBuyer({
+      result = await authRegister({
         fullName: form.name,
         email: form.email,
         password: form.password,

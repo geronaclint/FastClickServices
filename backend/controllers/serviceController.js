@@ -5,17 +5,25 @@ import db from "../db.js";
 // @access  Public
 export const getServices = async (req, res) => {
   try {
-    const services = await db.query(`
-      SELECT s.*, u.full_name as provider_name 
-      FROM services s
-      JOIN users u ON s.provider_id = u.id
-      ORDER BY s.created_at DESC
-    `);
+    const { limit, offset } = req.pagination || { limit: 20, offset: 0 };
 
+    const countResult = await db.query("SELECT COUNT(*) FROM services");
+    const services = await db.query(
+      `SELECT s.*, u.full_name as provider_name
+       FROM services s
+       JOIN users u ON s.provider_id = u.id
+       ORDER BY s.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+
+    const totalCount = parseInt(countResult.rows[0].count, 10);
     res.json({
       success: true,
-      count: services.rows.length,
       data: services.rows,
+      page: req.pagination?.page || 1,
+      totalPages: Math.ceil(totalCount / limit),
+      totalCount,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

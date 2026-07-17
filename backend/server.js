@@ -105,6 +105,10 @@ app.get("/api/test-db", async (req, res) => {
   }
 });
 
+// Centralized error handler (must be last)
+import errorHandler from "./middleware/errorHandler.js";
+app.use(errorHandler);
+
 // Port
 const PORT = process.env.PORT || 5000;
 

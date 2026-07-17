@@ -1,63 +1,92 @@
-import { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import BuyerLayout from "./components/buyer/BuyerLayout";
+import SellerShell from "./components/seller/SellerShell";
 import AppAuth from "./AppAuth";
-import BuyerDashboard from "./pages/buyer/BuyerDashboard";
-import SellerPortal from "./components/seller/SellerLayout";
-import { isSellerLoggedIn } from "./utils/sellerAuth";
-import { getUser, clearAuthData } from "./services/authService";
+import DashboardContent from "./pages/buyer/DashboardContent";
+import InstallationPage from "./pages/buyer/InstallationPage";
+import TicketPage from "./pages/buyer/TicketPage";
+import RecentPage from "./pages/buyer/RecentPage";
+import PremiumPage from "./pages/buyer/PremiumPage";
+import ProfilePage from "./pages/buyer/ProfilePage";
+
+function RequireAuth({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
+        <div className="text-slate-400 text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "buyer") {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+function RequireSeller({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#fff7f4]">
+        <div className="text-slate-400 text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user || (user.role !== "provider" && user.role !== "admin" && user.role !== "seller")) {
+    return <Navigate to="/seller-login" replace />;
+  }
+
+  return children;
+}
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [path, setPath] = useState(window.location.pathname);
-  const [user, setUser] = useState(null);
+  return (
+    <Routes>
+      {/* Auth routes */}
+      <Route path="/login" element={<AppAuth portalType="buyer" />} />
+      <Route path="/seller-login" element={<AppAuth portalType="seller" />} />
 
-  useEffect(() => {
-    const saved = getUser();
-    if (saved && saved.role === "buyer") {
-      setIsLoggedIn(true);
-      setUser(saved);
-    }
-  }, []);
+      {/* Buyer protected routes */}
+      <Route
+        element={
+          <RequireAuth>
+            <BuyerLayout />
+          </RequireAuth>
+        }
+      >
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardContent />} />
+        <Route path="installation" element={<InstallationPage />} />
+        <Route path="ticket" element={<TicketPage />} />
+        <Route path="recent" element={<RecentPage />} />
+        <Route path="premium" element={<PremiumPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+      </Route>
 
-  useEffect(() => {
-    const updatePath = () => setPath(window.location.pathname);
-    window.addEventListener("popstate", updatePath);
-    return () => window.removeEventListener("popstate", updatePath);
-  }, []);
+      {/* Seller protected routes */}
+      <Route
+        element={
+          <RequireSeller>
+            <SellerShell />
+          </RequireSeller>
+        }
+      >
+        <Route path="seller-dashboard" element={<div />} />
+        <Route path="seller-requests" element={<div />} />
+        <Route path="seller-tickets" element={<div />} />
+        <Route path="seller-analytics" element={<div />} />
+        <Route path="seller-subscription" element={<div />} />
+      </Route>
 
-  const sellerPageMap = {
-    "/seller-dashboard": "dashboard",
-    "/seller-requests": "requests",
-    "/seller-tickets": "tickets",
-    "/seller-analytics": "analytics",
-    "/seller-subscription": "subscription",
-  };
-
-  if (path === "/seller-login") {
-    return <AppAuth portalType="seller" />;
-  }
-
-  if (sellerPageMap[path]) {
-    if (!isSellerLoggedIn()) {
-      window.history.replaceState({}, "", "/seller-login");
-      return <AppAuth portalType="seller" />;
-    }
-    return <SellerPortal page={sellerPageMap[path]} />;
-  }
-
-  const handleLogin = (loggedInUser) => {
-    setIsLoggedIn(true);
-    setUser(loggedInUser);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-    clearAuthData();
-  };
-
-  return isLoggedIn ? (
-    <BuyerDashboard onLogout={handleLogout} user={user} />
-  ) : (
-    <AppAuth onLogin={handleLogin} />
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }

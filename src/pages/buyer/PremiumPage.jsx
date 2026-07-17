@@ -1,4 +1,5 @@
 import { Check, Crown, Star, Zap } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const plans = [
   {
@@ -142,8 +143,9 @@ function PlanCard({ plan, currentPlan, onUpgrade }) {
   );
 }
 
-export default function PremiumPage({ user, onUpgrade }) {
-  const currentPlan = user?.subscription || "Free";
+export default function PremiumPage() {
+  const { user, updateUser, subscription } = useAuth();
+  const currentPlan = subscription || "Free";
 
   const handleUpgrade = (planName) => {
     if (planName === currentPlan) return;
@@ -153,7 +155,7 @@ export default function PremiumPage({ user, onUpgrade }) {
         : "Upgrade";
 
     if (window.confirm(`${action} to ${planName} plan? Your dashboard will update immediately.`)) {
-      onUpgrade(planName);
+      updateUser({ subscription: planName });
     }
   };
 

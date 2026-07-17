@@ -7,11 +7,12 @@ import {
   deleteService
 } from "../controllers/serviceController.js";
 import { protect, providerOnly } from "../middleware/authMiddleware.js";
+import { parsePagination } from "../middleware/pagination.js";
 
 const router = express.Router();
 
 router.route("/")
-  .get(getServices)
+  .get(parsePagination, getServices)
   .post(protect, providerOnly, createService);
 
 router.route("/:id")

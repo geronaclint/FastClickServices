@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle2,
@@ -43,7 +44,8 @@ function StatCard({ item }) {
   );
 }
 
-function QuickAction({ icon: Icon, label, color, onClick }) {
+function QuickAction({ icon: Icon, label, color, to }) {
+  const navigate = useNavigate();
   const style =
     color === "orange"
       ? "border-orange-200 bg-orange-50 text-orange-500"
@@ -52,7 +54,7 @@ function QuickAction({ icon: Icon, label, color, onClick }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => navigate(to)}
       className={`flex items-center justify-between rounded-2xl border p-3 text-left transition hover:scale-[1.02] ${style}`}
     >
       <div className="flex items-center gap-3">
@@ -65,7 +67,8 @@ function QuickAction({ icon: Icon, label, color, onClick }) {
   );
 }
 
-export default function DashboardContent({ setPage }) {
+export default function DashboardContent() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [activities, setActivities] = useState([]);
 
@@ -90,7 +93,7 @@ export default function DashboardContent({ setPage }) {
             time: t.created_at ? formatTimeAgo(t.created_at) : "",
             icon: t.status === "Finished" ? CheckCircle2 : Clock3,
             color: t.status === "Finished" ? "emerald" : "orange",
-            sourceIcon: Ticket, // Type specific icon
+            sourceIcon: Ticket,
             timestamp: new Date(t.created_at).getTime(),
           });
         });
@@ -103,7 +106,7 @@ export default function DashboardContent({ setPage }) {
             time: r.created_at ? formatTimeAgo(r.created_at) : "",
             icon: r.status === "Finished" ? CheckCircle2 : Clock3,
             color: r.status === "Finished" ? "emerald" : "blue",
-            sourceIcon: Wrench, // Type specific icon
+            sourceIcon: Wrench,
             timestamp: new Date(r.created_at).getTime(),
           });
         });
@@ -141,13 +144,13 @@ export default function DashboardContent({ setPage }) {
         <div>
           <h1 className="text-3xl font-extrabold text-slate-950">Dashboard</h1>
           <p className="mt-2 text-slate-500">
-            Welcome back! Here's what's happening with your account.
+            Welcome back! Here&apos;s what&apos;s happening with your account.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => setPage("premium")}
+          onClick={() => navigate("/premium")}
           className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow-sm transition hover:bg-blue-700"
         >
           <Zap className="h-5 w-5" />
@@ -165,30 +168,10 @@ export default function DashboardContent({ setPage }) {
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="mb-5 text-xl font-extrabold">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
-            <QuickAction
-              icon={Wrench}
-              label="Service"
-              color="blue"
-              onClick={() => setPage("installation")}
-            />
-            <QuickAction
-              icon={Ticket}
-              label="Ticket"
-              color="orange"
-              onClick={() => setPage("ticket")}
-            />
-            <QuickAction
-              icon={Crown}
-              label="Premium"
-              color="orange"
-              onClick={() => setPage("premium")}
-            />
-            <QuickAction
-              icon={UserRound}
-              label="Edit Profile"
-              color="blue"
-              onClick={() => setPage("profile")}
-            />
+            <QuickAction icon={Wrench} label="Service" color="blue" to="/installation" />
+            <QuickAction icon={Ticket} label="Ticket" color="orange" to="/ticket" />
+            <QuickAction icon={Crown} label="Premium" color="orange" to="/premium" />
+            <QuickAction icon={UserRound} label="Edit Profile" color="blue" to="/profile" />
           </div>
         </section>
 
@@ -197,7 +180,7 @@ export default function DashboardContent({ setPage }) {
             <h2 className="text-xl font-extrabold">Recent Activity</h2>
             <button
               type="button"
-              onClick={() => setPage("recent")}
+              onClick={() => navigate("/recent")}
               className="flex items-center gap-1 font-semibold text-blue-600"
             >
               View all <ArrowRight className="h-4 w-4" />
@@ -225,7 +208,7 @@ export default function DashboardContent({ setPage }) {
                 return (
                   <div
                     key={idx}
-                    onClick={() => setPage("recent")}
+                    onClick={() => navigate("/recent")}
                     className="flex cursor-pointer items-center gap-5 rounded-2xl border border-slate-100 p-4 transition hover:border-blue-200 hover:bg-blue-50/50"
                   >
                     <div className={`flex h-10 w-10 items-center justify-center rounded-full ${circle}`}>
@@ -233,8 +216,8 @@ export default function DashboardContent({ setPage }) {
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                         <SourceIcon className={`h-3 w-3 ${activity.color === 'emerald' ? 'text-emerald-500' : 'text-slate-400'}`} />
-                         <p className="font-semibold">{activity.text}</p>
+                        <SourceIcon className={`h-3 w-3 ${activity.color === "emerald" ? "text-emerald-500" : "text-slate-400"}`} />
+                        <p className="font-semibold">{activity.text}</p>
                       </div>
                       <p className="mt-1 text-sm text-slate-400">{activity.time}</p>
                     </div>
@@ -255,7 +238,7 @@ export default function DashboardContent({ setPage }) {
         </div>
         <button
           type="button"
-          onClick={() => setPage("premium")}
+          onClick={() => navigate("/premium")}
           className="flex items-center gap-2 rounded-xl bg-orange-500 px-7 py-4 font-bold transition hover:bg-orange-600"
         >
           <Zap className="h-5 w-5" />
