@@ -9,6 +9,7 @@ import TicketPage from "./pages/buyer/TicketPage";
 import RecentPage from "./pages/buyer/RecentPage";
 import PremiumPage from "./pages/buyer/PremiumPage";
 import ProfilePage from "./pages/buyer/ProfilePage";
+import TokenPreview from "./pages/TokenPreview";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -49,6 +50,9 @@ function RequireSeller({ children }) {
 export default function App() {
   return (
     <Routes>
+      {/* Design token preview (temporary — remove before production merge) */}
+      <Route path="/token-preview" element={<TokenPreview />} />
+
       {/* Auth routes */}
       <Route path="/login" element={<AppAuth portalType="buyer" />} />
       <Route path="/seller-login" element={<AppAuth portalType="seller" />} />

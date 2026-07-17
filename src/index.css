@@ -1,9 +1,11 @@
+@import "./tokens.css";
 @import "tailwindcss";
 
+/* ── Base ── */
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  color: #0f172a;
-  background: #eef4ff;
+  color: var(--neutral-900);
+  background: var(--buyer-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -25,39 +27,46 @@ body {
   min-width: 320px;
 }
 
-
-/* Dark mode global buyer dashboard fix */
+/* ── Dark Mode — CSS variable swap ── */
 .dark-mode {
+  --neutral-50: #0f172a;
+  --neutral-100: #1e293b;
+  --neutral-200: #334155;
+  --neutral-900: #f8fafc;
+  --buyer-bg: #020617;
   background: #020617;
-  color: #ffffff;
+  color: #f8fafc;
 }
 
 .dark-mode main {
   background: #020617;
 }
 
+/* Card surfaces in dark mode */
 .dark-mode .bg-white {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
+  background-color: var(--neutral-100) !important;
+  color: inherit;
 }
 
 .dark-mode .bg-slate-50,
 .dark-mode .bg-slate-100 {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
+  background-color: var(--neutral-100) !important;
+  color: inherit;
 }
 
+/* Borders in dark mode */
 .dark-mode .border-slate-100,
 .dark-mode .border-slate-200,
 .dark-mode .border-slate-300 {
-  border-color: #334155 !important;
+  border-color: var(--neutral-200) !important;
 }
 
+/* Text in dark mode */
 .dark-mode .text-slate-950,
 .dark-mode .text-slate-900,
 .dark-mode .text-slate-800,
 .dark-mode .text-slate-700 {
-  color: #ffffff !important;
+  color: var(--neutral-900) !important;
 }
 
 .dark-mode .text-slate-600,
@@ -66,12 +75,13 @@ body {
   color: #cbd5e1 !important;
 }
 
+/* Form elements in dark mode */
 .dark-mode input,
 .dark-mode textarea,
 .dark-mode select {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
-  border-color: #334155 !important;
+  background-color: var(--neutral-100) !important;
+  color: var(--neutral-900) !important;
+  border-color: var(--neutral-200) !important;
 }
 
 .dark-mode input::placeholder,
@@ -79,6 +89,7 @@ body {
   color: #94a3b8 !important;
 }
 
+/* Accent backgrounds in dark mode */
 .dark-mode .bg-blue-50 {
   background-color: #172554 !important;
 }
@@ -95,31 +106,31 @@ body {
   background-color: #2e1065 !important;
 }
 
+/* Tables in dark mode */
 .dark-mode table thead {
-  background-color: #1e293b !important;
+  background-color: var(--neutral-100) !important;
 }
 
 .dark-mode tr {
-  border-color: #334155 !important;
+  border-color: var(--neutral-200) !important;
 }
 
+/* ── Print Styles ── */
 @media print {
-  /* Hide sidebar and topbar */
-  aside, 
-  header, 
+  aside,
+  header,
   nav,
   .fixed,
   button,
   .shadow-sm {
     box-shadow: none !important;
   }
-  
+
   aside,
   div[class*="fixed left-[245px]"] {
     display: none !important;
   }
 
-  /* Reset layout to print cleanly */
   main {
     padding: 0 !important;
     margin: 0 !important;
@@ -127,14 +138,13 @@ body {
     color: black !important;
   }
 
-  /* Ensure background colors print correctly */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide dark mode backgrounds */
-  .dark-mode, .dark-mode main {
+  .dark-mode,
+  .dark-mode main {
     background: white !important;
     color: black !important;
   }

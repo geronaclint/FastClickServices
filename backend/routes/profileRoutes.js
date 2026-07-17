@@ -1,6 +1,5 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
-import { requireSubscription } from "../middleware/subscriptionMiddleware.js";
 import {
   getProfile,
   updateProfile,
@@ -13,11 +12,6 @@ const router = express.Router();
 router.get("/", protect, getProfile);
 router.put("/", protect, updateProfile);
 router.get("/dashboard-stats", protect, getDashboardStats);
-router.get(
-  "/seller-stats",
-  protect,
-  requireSubscription("Professional"),
-  getSellerStats
-);
+router.get("/seller-stats", protect, getSellerStats);
 
 export default router;
